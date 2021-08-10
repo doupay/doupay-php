@@ -218,8 +218,26 @@ class Paymentinfo
 		return $res['res'];
     }
 	
-	public function callback($orderCode, $orderType, $coinName, $protocolName, $price, $address, $amount, $money, $result, $paymentStatus)
+	 /**
+     * 回调
+     * @param orderCode  orderCode
+	 * @param orderType  orderType
+     * @return
+     */
+	public function callback($orderCode, $orderType, $coinName, $protocolName, $price, $address, $amount, $money, $result, $paymentStatus, $hashId)
 	{
+		switch ($orderType)
+		{
+		case 'payment':
+			// 商家支付回调逻辑
+			break;
+		case 'makeUp':
+			// 商家补单回调逻辑
+			break;
+		case 'withdraw':
+			// 商家提币回调逻辑
+			break;
+		}
 		// self logic
 		return Lib::result(200, 'OK');
 	}
@@ -399,6 +417,42 @@ class Paymentinfo
         }
 		return $res['res'];
     }
+
+    /**
+     * 获取汇率
+     * @param coinName coinName
+     * @param currency currencyEnum
+     * @return
+     */
+    public function getCurrencyCoinPrice($coinName='', $currency='')
+    {
+        $uri = '/trade/getCurrencyCoinPrice';
+		
+		if(empty($coinName) || empty($currency)){
+            return Lib::result(402, '参数错误');
+        }
+
+		$data = array(
+			'coinName' => $coinName,
+			'currency' => $currency
+		);
+
+        $signature = $this->signature($data);
+        $header = array(
+            'X-Merchant-sign:'.base64_encode($signature),
+            'Content-Type:application/json;charset=UTF-8',
+            'X-Language:'.$this->language,
+            'X-Version:'.$this->Version
+        );
+
+        $res = Http::post($this->basrUrl.$uri, json_encode($data), $this->expireTime, $header);
+
+		if($res['code'] != 200){
+            return Lib::result(999, $res['code'].$res['msg']);
+        }
+		return $res['res'];
+    }
+
 
     /**
      * 获取单价汇率
