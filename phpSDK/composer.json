@@ -1,0 +1,21 @@
+{
+    "name": "doupay/doupay-php",
+    "description": "doupay-php sdk",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "doupay",
+            "email": "i@doupay.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php":">=5.6"
+    },
+    "autoload":{
+        "psr-4":{
+            "doupay\\doupayphp\\":"src/doupay/doupay-php"
+        }
+    }
+}
