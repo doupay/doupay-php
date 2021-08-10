@@ -14,7 +14,6 @@
 
     $params = json_decode(file_get_contents("php://input"), true);
     $method = isset($_POST['method']) ? $_POST['method'] : $_GET['method'];
-	
 	switch ($method)
 	{
 	//获取币种列表
@@ -58,6 +57,10 @@
 	case 'withdraw':
 		//提现
 		$res = $obj->withdraw($params['address'], $params['amount'], $params['coinName'],$params['merchantUser'], $params['orderNo'], $params['orderType']);
+		break;
+	case 'getCurrencyCoinPrice':
+		//获取汇率
+		$res = $obj->getCurrencyCoinPrice($params['coinName'], $params['currency']);
 		break;
 	case 'getCoinPrice':
 		//获取单价汇率
