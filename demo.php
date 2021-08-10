@@ -9,8 +9,8 @@
     $privateKey = '';
     $publicKey = '';
     $expireTime = '20';
-	//初始化
-	$obj = Constants::init($appid, $secret, $publicKey, $privateKey, $expireTime);
+    //初始化
+    $obj = Constants::init($appid, $secret, $publicKey, $privateKey, $expireTime);
 
     $params = json_decode(file_get_contents("php://input"), true);
     $method = isset($_POST['method']) ? $_POST['method'] : $_GET['method'];
@@ -58,13 +58,9 @@
 		//提现
 		$res = $obj->withdraw($params['address'], $params['amount'], $params['coinName'],$params['merchantUser'], $params['orderNo'], $params['orderType']);
 		break;
-	case 'getCurrencyCoinPrice':
+	case 'getCoinPrice':
 		//获取汇率
 		$res = $obj->getCurrencyCoinPrice($params['coinName'], $params['currency']);
-		break;
-	case 'getCoinPrice':
-		//获取单价汇率
-		$res = $obj->getCoinPrice($params['orderType'], $params['amount'], $params['money'],$params['coinName'], $params['currency']);
 		break;
 	case 'getBillRecords':
 		//获取账单
