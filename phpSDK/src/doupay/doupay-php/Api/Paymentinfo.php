@@ -9,7 +9,7 @@ class Paymentinfo
     public $basrUrl = '';
     public $language = 'en_US';
     public $Version = 'v1.0';
-    public $expireTime = 20;
+    public $expireTime = 1800;
 
     public function __construct($baseUrl, $language, $Version, $appid, $secret, $publicKey, $privateKey, $expireTime)
     {
@@ -242,6 +242,33 @@ class Paymentinfo
 		return Lib::result(200, 'OK');
 	}
 
+    /**
+     * 查询回调
+     * @param orderCode  orderCode
+     * @return
+     */
+    public function getCallback($orderCode)
+    {
+        if(empty($orderCode)){
+            return Lib::result(401, '订单号不能为空');
+        }
+        $uri = '/trade/getCallback';
+        $data = array(
+            'orderCode' => $orderCode,
+        );
+        $signature = $this->signature($data);
+        $header = array(
+            'X-Merchant-sign:'.base64_encode($signature),
+            'Content-Type:application/json;charset=UTF-8',
+            'X-Language:'.$this->language,
+            'X-Version:'.$this->Version
+        );
+        $res = Http::post($this->basrUrl.$uri, json_encode($data), $this->expireTime, $header);
+        if($res['code'] != 200){
+            return Lib::result(999, $res['code'].$res['msg']);
+        }
+		return $res['res'];
+    }
 
     /**
      * 取消订单
@@ -421,6 +448,86 @@ class Paymentinfo
         $res = Http::post($this->basrUrl.$uri, json_encode($data), $this->expireTime, $header);
 
 		if($res['code'] != 200){
+            return Lib::result(999, $res['code'].$res['msg']);
+        }
+		return $res['res'];
+    }
+
+
+    /**
+     * 获取单价汇率
+     * @param coinName coinName
+     * @param currency currencyEnum
+     * @return
+     */
+    public function getCoinPrice($orderTypeCodeEnum, $amount='', $money='', $coinName='', $currency='')
+    {
+        $uri = '/trade/getCoinPrice';
+        if(empty($orderTypeCodeEnum) || !in_array($orderTypeCodeEnum, array('BY_AMOUNT', 'BY_MONEY'))){
+            return Lib::result(401, '参数不能为空');
+        }
+        if($orderTypeCodeEnum == 'BY_AMOUNT'){
+            if(!isset($amount) || empty($coinName)){
+                return Lib::result(402, '参数错误');
+            }
+            $data = array(
+                'amount' => $amount,
+                'payType' => $orderTypeCodeEnum,
+                'coinName' => $coinName
+            );
+        }elseif($orderTypeCodeEnum == 'BY_MONEY'){
+            if(!isset($money) || empty($currency)){
+                return Lib::result(402, '参数错误');
+            }
+            $data = array(
+                'money' => $money,
+                'payType' => $orderTypeCodeEnum,
+                'currency' => $currency
+            );
+        }else{
+            return Lib::result(412, '参数错误');
+        }
+        $signature = $this->signature($data);
+        $header = array(
+            'X-Merchant-sign:'.base64_encode($signature),
+            'Content-Type:application/json;charset=UTF-8',
+            'X-Language:'.$this->language,
+            'X-Version:'.$this->Version
+        );
+
+        $res = Http::post($this->basrUrl.$uri, json_encode($data), $this->expireTime, $header);
+
+		if($res['code'] != 200){
+            return Lib::result(999, $res['code'].$res['msg']);
+        }
+		return $res['res'];
+    }
+
+    /**
+     * 获取账单
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @param pageSize 数量
+     * @param pageNo 页数
+     */
+    public function getBillRecords($startTime, $endTime, $pageSize, $pageNo)
+    {
+        $uri = '/trade/getBill';
+        $data = array(
+            'startTime' => $startTime,
+            'endTime' => $endTime,
+            'pageSize' => $pageSize,
+            'pageNo' => $pageNo,
+        );
+        $signature = $this->signature($data);
+        $header = array(
+            'X-Merchant-sign:'.base64_encode($signature),
+            'Content-Type:application/json;charset=UTF-8',
+            'X-Language:'.$this->language,
+            'X-Version:'.$this->Version
+        );
+        $res = Http::post($this->basrUrl.$uri, json_encode($data), $this->expireTime, $header);
+        if($res['code'] != 200){
             return Lib::result(999, $res['code'].$res['msg']);
         }
 		return $res['res'];
