@@ -62,14 +62,6 @@
 		//获取汇率
 		$res = $obj->getCurrencyCoinPrice($params['coinName'], $params['currency']);
 		break;
-	case 'getBillRecords':
-		//获取账单
-		$res = $obj->getBillRecords($params['startTime'], $params['endTime'], $params['pageSize'],$params['pageNo']);
-		break;
-	case 'getCallback':
-		//查询回调
-		$res = $obj->getCallback($params['orderCode']);
-		break;
 	case 'callback':
 		//回调
 		$res = $obj->callbakc($params['orderCode'], $params['orderType'], $params['coinName'], $params['protocolName'], $params['price'], $params['address'], $params['amountPaid'], $params['money'], $params['result'], $params['paymentStatus']);
