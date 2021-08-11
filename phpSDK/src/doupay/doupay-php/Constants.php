@@ -35,7 +35,7 @@ class Constants
         if(empty($expireTime)){
             return Lib::result(414, 'expireTime is null.');
         }
-        if($expireTime <=0 ){
+        if($expireTime < 1800 || $expireTime > 7200){
             return Lib::result(415, 'expireTime error.');
         }
         return new Paymentinfo(self::$basrUrl, self::$language, self::$Version, $appid, $secret, $publicKey, $privateKey, $expireTime);
