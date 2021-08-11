@@ -8,7 +8,7 @@
     $secret = '';
     $privateKey = '';
     $publicKey = '';
-    $expireTime = '20';
+    $expireTime = '1800';
     //初始化
     $obj = Constants::init($appid, $secret, $publicKey, $privateKey, $expireTime);
 
@@ -36,7 +36,7 @@
 		//付款
 		$orderNo = 'DD' . date('YmdHis',time()). rand(pow(10,2), pow(10,3)-1);
 		$subject = '测试商品名称';
-		$res = $obj->pay($params['amount'], $params['money'], $params['coinName'], $params['currency'], $params['merchantUser'], $orderNo, $subject, $params['body'], $params['description'], $params['expireTime'], $params['orderType'], $params['hashId']);
+		$res = $obj->pay($params['amount'], $params['money'], $params['coinName'], $params['currency'], $params['merchantUser'], $orderNo, $subject, $params['body'], $params['description'], $expireTime, $params['orderType'], $params['hashId']);
 		break;
 	case 'maleUp':
 		//补单
@@ -61,6 +61,14 @@
 	case 'getCoinPrice':
 		//获取汇率
 		$res = $obj->getCurrencyCoinPrice($params['coinName'], $params['currency']);
+		break;
+	case 'getBillRecords':
+		//获取账单
+		$res = $obj->getBillRecords($params['startTime'], $params['endTime'], $params['pageSize'],$params['pageNo']);
+		break;
+	case 'getCallback':
+		//查询回调
+		$res = $obj->getCallback($params['orderCode']);
 		break;
 	case 'callback':
 		//回调
