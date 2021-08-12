@@ -56,7 +56,11 @@
 		break;
 	case 'withdraw':
 		//提现
-		$res = $obj->withdraw($params['address'], $params['amount'], $params['coinName'],$params['merchantUser'], $params['orderNo'], $params['orderType']);
+		$res = $obj->withdraw($params['address'], $params['amount'], $params['coinName'],$params['merchantUser'], $params['orderNo'], $params['orderType'], $params['protocolName']);
+		break;
+	case 'getChainCoins':
+		//获取链列表
+		$res = $obj->getChainCoins($params['appId'], $params['coinName']);
 		break;
 	case 'getCoinPrice':
 		//获取汇率
