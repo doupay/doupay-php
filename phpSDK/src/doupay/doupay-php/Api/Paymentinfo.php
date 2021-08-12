@@ -373,7 +373,7 @@ class Paymentinfo
      * @param merchantUser     	   商家用户【长度10到20之间】
      * @param orderNo              订单号【长度10到30】
      */
-    public function withdraw($address, $amount, $coinName, $merchantUser, $orderNo, $orderType, $currency ='', $money='')
+    public function withdraw($address, $amount, $coinName, $merchantUser, $orderNo, $orderType, $currency ='', $money='', $protocolName)
     {
         if(empty($address) || empty($merchantUser) || empty($orderNo) || empty($orderType)){
             return Lib::result(401, '参数不正确');
@@ -403,6 +403,7 @@ class Paymentinfo
         }else{
             return Lib::result(404, 'error');
         }
+		$data['protocolName'] = $protocolName;
 		
 		$secertSign = openssl_encrypt($this->appid.$timestamp, 'aes-256-ecb', $this->secret, OPENSSL_RAW_DATA);
         $data['secretSign'] = base64_encode($secertSign);
@@ -421,6 +422,36 @@ class Paymentinfo
         }
 		return $res['res'];
     }
+	
+	 /**
+     * 获取链列表
+	 * @param appId appId
+     * @param coinName coinName
+     * @return
+     */
+	public function getChainCoins($appId = '', $coinName = '')
+	{
+		$uri = '/trade/getChainCoins';
+		if(empty($appId) || empty($coinName)){
+            return Lib::result(402, '参数错误');
+        }
+		$data = array(
+			'appId' => $appId,
+			'coinName' => $coinName
+		);
+		$signature = $this->signature($data);
+		$header = array(
+            'X-Merchant-sign:'.base64_encode($signature),
+            'Content-Type:application/json;charset=UTF-8',
+            'X-Language:'.$this->language,
+            'X-Version:'.$this->Version
+        );
+		$res = Http::post($this->basrUrl.$uri, json_encode($data), $this->expireTime, $header);
+		if($res['code'] != 200){
+            return Lib::result(999, $res['code'].$res['msg']);
+        }
+		return $res['res'];
+	}
 
     /**
      * 获取汇率
