@@ -128,7 +128,7 @@ class Paymentinfo
     }
 
     /**
-     * 付款,当orderType为0001时,amount内容为金额,currency为必传,当orderType为0002时amount内容为数量,coinName为必传
+     * 付款,当orderType为BY_MONEY时,money为金额,currency为货币标识是必传,当orderType为BY_AMOUNT时amount内容为数量,coinName为币种名称是必传
      */
     public function pay($amount, $money, $coinName, $currency, $merchantUser, $orderNo, $subject, $body, $description, $expireTime, $orderType)
     {
