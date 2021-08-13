@@ -599,13 +599,16 @@ class Paymentinfo
 		if (empty($headerSignString) || empty($bodyString)) {
 			return Lib::result(401, '请传入签名头和body体');
 		}
+		// 处理boolean类型错误
+		$bodyString = str_replace("false","\"false\"", str_replace("true","\"true\"", $bodyString));
 		$signString = $this->generateClearTextSign($bodyString);
+		// 组装公钥
 		$publicKey = "-----BEGIN PUBLIC KEY-----\n" .
 			wordwrap($this->publicKey, 64, "\n", true) .
 			"\n-----END PUBLIC KEY-----";
 		$pub_key = openssl_get_publickey($publicKey);
-		//验证签名
-        $isRight = (bool)openssl_verify($signString, base64_decode($headerSignString), $pub_key ,OPENSSL_ALGO_SHA256);
+		// 验证签名
+		$isRight = (bool)openssl_verify($signString, base64_decode($headerSignString), $pub_key ,"SHA256");
 		return $isRight;
 	}
 
