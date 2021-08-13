@@ -605,7 +605,7 @@ class Paymentinfo
 			"\n-----END PUBLIC KEY-----";
 		$pub_key = openssl_get_publickey($publicKey);
 		//验证签名
-        $isRight = (bool)openssl_verify($signString, $headerSignString, $pub_key ,OPENSSL_ALGO_SHA256);
+        $isRight = (bool)openssl_verify($signString, base64_decode($headerSignString), $pub_key ,OPENSSL_ALGO_SHA256);
 		return $isRight;
 	}
 
