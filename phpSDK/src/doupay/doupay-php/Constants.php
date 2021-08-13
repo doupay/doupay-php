@@ -8,7 +8,7 @@ class Constants
 {
     public static $openSysLog = false;
     public static $basrUrl = "http://pay.apipay.one";
-    public static $language = 'en_US';
+    public static $language = 'zh_TW';
     public static $Version = 'v1.0';
 
     /**
@@ -36,7 +36,7 @@ class Constants
             return Lib::result(414, 'expireTime is null.');
         }
         if($expireTime < 1800 || $expireTime > 7200){
-            return Lib::result(415, 'expireTime is greater than 1800 seconds and less than 7200 seconds.');
+            return Lib::result(415, 'expireTime error.');
         }
         return new Paymentinfo(self::$basrUrl, self::$language, self::$Version, $appid, $secret, $publicKey, $privateKey, $expireTime);
     }
