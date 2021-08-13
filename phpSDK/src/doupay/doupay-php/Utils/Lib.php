@@ -10,14 +10,14 @@ class Lib
      *
      * @param Integer $code 状态码
      * @param mixed $data 数据
-     * @param String $message 数据信息Tag
+     * @param String $msg 数据信息Tag
      *
      */
-    public static function result($code, $message = 'null', $data = array()){
+    public static function result($code, $msg = 'null', $data = array()){
         $dataString = json_encode($data);
         $res = array(
             'code' => $code,
-            'message' => $message,
+            'msg' => $msg,
             'data' => $data,
             'md5' => md5($dataString)
         );
