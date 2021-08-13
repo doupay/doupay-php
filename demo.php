@@ -76,11 +76,12 @@
 		break;
 	case 'callback':
 		//回调
-		$res = $obj->callbakc($params['orderCode'], $params['orderType'], $params['coinName'], $params['protocolName'], $params['price'], $params['address'], $params['amountPaid'], $params['money'], $params['result'], $params['paymentStatus']);
+		$merchantSign = getallheaders()['X-Merchant-Sign'];
+		$res = $obj->callback($merchantSign, file_get_contents("php://input"));
 		break;
 	default:
-		$res = json_encode(array('code'=>444, 'message'=>'error'));
+		$res = json_encode(array('code'=>444, 'msg'=>'error'));
     }
 	
 	$res_data = json_decode($res, true);
-    echo json_encode(array('code'=>$res_data['code'], 'message'=>$res_data['message'], 'data'=>$res_data['data']));die;
+    echo json_encode(array('code'=>$res_data['code'], 'msg'=>$res_data['msg'], 'data'=>$res_data['data']));die;
