@@ -4,7 +4,7 @@
     use doupay\doupayphp\Constants;
     header("content-type:application/json");
     //初始化参数
-	$appid = '';
+    $appid = '';
     $secret = '';
     $privateKey = '';
     $publicKey = '';
