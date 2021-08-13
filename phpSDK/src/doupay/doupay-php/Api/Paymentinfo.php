@@ -7,7 +7,7 @@ use doupay\doupayphp\Utils\Lib;
 class Paymentinfo
 {
     public $basrUrl = '';
-    public $language = 'en_US';
+	public $language = 'zh_TW';
     public $Version = 'v1.0';
     public $expireTime = 1800;
 
@@ -138,11 +138,13 @@ class Paymentinfo
         $uri = '/trade/pay';
         $data = array(
             'appId' => $this->appid,
-            'merchantUser' => $merchantUser,
             'orderNo' => $orderNo,
             'subject' => $subject,
             'orderType' => $orderType
         );
+		
+		if(!empty($merchantUser)) $data['merchantUser'] = $merchantUser;
+		
         if($orderType == 'BY_AMOUNT'){
             if(empty($amount) || empty($coinName)){
                 return Lib::result(402, '参数缺少');
@@ -224,9 +226,14 @@ class Paymentinfo
 	 * @param orderType  orderType
      * @return
      */
-	public function callback($orderCode, $orderType, $coinName, $protocolName, $price, $address, $amount, $money, $result, $paymentStatus, $hashId)
+	public function callback($merchantSign, $bodyString)
 	{
-		switch ($orderType)
+		if (!$this->verifySignature($merchantSign, $bodyString)) {
+			return Lib::result(501, '签名不正确');
+		}
+		$body = json_decode($bodyString, true);
+		// self logic
+		switch ($body['orderType'])
 		{
 		case 'payment':
 			// 商家支付回调逻辑
@@ -238,7 +245,6 @@ class Paymentinfo
 			// 商家提币回调逻辑
 			break;
 		}
-		// self logic
 		return Lib::result(200, 'OK');
 	}
 
@@ -415,11 +421,12 @@ class Paymentinfo
             'X-Language:'.$this->language,
             'X-Version:'.$this->Version
         );
-
         $res = Http::post($this->basrUrl.$uri, json_encode($data), $this->expireTime, $header);
+		
         if($res['code'] != 200){
             return Lib::result(999, $res['code'].$res['msg']);
         }
+
 		return $res['res'];
     }
 	
@@ -584,79 +591,23 @@ class Paymentinfo
         return $signature;
     }
 
-
-    /**
-     * 验证回调签名并组装回调对象
-     * @param headerSignString header中的签名(X-Merchant-sign)
+	/**
+	 * @param headerSignString header中的签名(X-Merchant-sign)
      * @param bodyString  body体内容
-     * @param listener 回调结果
-     */
-    public function verifySignAndGetResult($headerSignString, $bodyString, $listener, $withdrawCalllBack, $makeUpCallBackResponseCallBack){
-        if (empty($headerSignString) || empty($bodyString)) {
-            if (!empty($listener)) {
-                return Lib::result(401, '请传入签名和body体');
-            }
-            if (!empty($withdrawCalllBack)) {
-                return Lib::result(402, '请传入签名和body体');
-            }
-            if (!empty($makeUpCallBackResponseCallBack)) {
-                return Lib::result(403, '请传入签名和body体');
-            }
-            return Lib::result(404, '参数错误');
-        }
-        $signString = $this->generateClearTextSign($bodyString);
-        //验证签名
-        $isRight = (bool)openssl_verify ($signString, $headerSignString, $this->publicKey ,OPENSSL_ALGO_SHA256);
-        if($isRight == false){
-            return Lib::result(201, '签名错误');
-        }
-        $data = json_decode($bodyString, true);
-        if($data['orderType'] == 'payment'){
-            $res_data = array(
-                'type' => $data['orderType'],
-                'orderCode' => $data['orderCode'],
-                'result' => $data['result'],
-                'coinName' => $data['coinName'],
-                'address' => $data['address'],
-                'amountPaid' => $data['amountPaid'],
-                'protocolName' => $data['protocolName'],
-                'paymentStatus' => $data['paymentStatus'],
-                'money' => $data['money']
-
-            );
-            return Lib::result(200, 'SUCCESS', $res_data);
-        }elseif ($data['orderType'] == 'withdraw'){
-            $res_data = array(
-                'type' => $data['orderType'],
-                'orderCode' => $data['orderCode'],
-                'coinName' => $data['coinName'],
-                'address' => $data['address'],
-                'amount' => $data['amount'],
-                'result' => $data['result'],
-                'money' => $data['money'],
-                'price' => $data['price'],
-                'currency' => $data['currency'],
-            );
-            return Lib::result(200, 'SUCCESS', $res_data);
-        }elseif ($data['orderType'] == 'makeUp'){
-            $res_data = array(
-                'type' => $data['orderType'],
-                'orderCode' => $data['orderCode'],
-                'address' => $data['address'],
-                'amountPaid' => $data['amountPaid'],
-                'coinName' => $data['coinName'],
-                'paymentStatus' => $data['paymentStatus'],
-                'protocolName' => $data['protocolName'],
-                'price' => $data['price'],
-                'money' => $data['money'],
-                'result' => $data['result'],
-            );
-            return Lib::result(200, 'SUCCESS', $res_data);
-        }else{
-            return Lib::result(410, '类型错误');
-        }
-
-    }
+	 */
+	public function verifySignature($headerSignString, $bodyString) {
+		if (empty($headerSignString) || empty($bodyString)) {
+			return Lib::result(401, '请传入签名头和body体');
+		}
+		$signString = $this->generateClearTextSign($bodyString);
+		$publicKey = "-----BEGIN PUBLIC KEY-----\n" .
+			wordwrap($this->publicKey, 64, "\n", true) .
+			"\n-----END PUBLIC KEY-----";
+		$pub_key = openssl_get_publickey($publicKey);
+		//验证签名
+        $isRight = (bool)openssl_verify($signString, $headerSignString, $pub_key ,OPENSSL_ALGO_SHA256);
+		return $isRight;
+	}
 
     public function generateClearTextSign($bodyString){
         $data = json_decode($bodyString, true);
